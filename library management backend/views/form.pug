@@ -1,0 +1,24 @@
+head 
+    title form
+    link(rel="stylesheet" href="style.css")
+
+body
+    div(class = "container")
+        div(class="Header") Enter the details of the book
+        form(class="form-signin" method="POST" action="/")
+            div(class="field title")
+                div(class="text") Title: 
+                input(class="titleFiled" type="text" name="title" required = true)
+            div(class="field price")
+                div(class="text") Price:
+                input(class="priceFiled" type="number" name="price" required = true)
+            div(class="genre field" required = true)
+                div(class="text") Genre
+                select(name="genre")
+                    each val, index in genres
+                        option(value=val) #{val}
+            div(class="author field" required = true)
+                div(class="text") Authors: 
+                input(class="authorFiled" type="text" name="authors")
+            div(class="caution") (please enter the name of authors separated by comma and space)
+            button submit

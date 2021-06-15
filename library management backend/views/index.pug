@@ -1,0 +1,17 @@
+head 
+    title Pug App
+    link(rel="stylesheet" href="style.css")
+body 
+    div(class = "container")
+        h1 Welcome to Mclaren College Library
+        h2 Available Book
+        div(class = "count") Books Count: #{message.length}
+        form(class="form-signin" method="GET" action="/new-book")
+            button(class="goTo") Add New Page
+        div(class = "books")
+            each val, index in message
+                div(class = "eachBook")
+                    div(class = "prop title") title: "#{val.title.toUpperCase()}"
+                    div(class = "prop price") price: #{val.price}
+                    div(class = "prop author") author: #{val.author}
+                    div(class = "prop genre") genre: #{val.genre.title}
