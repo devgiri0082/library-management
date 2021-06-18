@@ -25,26 +25,29 @@ app.set("view engine", "pug");
 //importing routes
 const bookRouter = require("./routes/books");
 const authRouter = require("./routes/auth");
+const allRefreshToken = require("./refreshTokens");
 app.use("/auth", authRouter);
 async function validateRequest(req, res, next) {
+  console.log("validatingRequest");
   let header = req.headers.authorization;
   if (!header) {
     res.status(401).json({ message: "authorization token not provided" });
     return;
   }
   let token = header.split(" ")[1];
+  console.log(token);
   if (!token) {
     res.status(401).json({ message: "authorization token not provided" });
     return;
   } else {
-    try {
-      console.log(token);
-      let decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-      console.log(decoded);
-      next();
-    } catch (err) {
-      res.status(401).json({ message: "invalid token" });
-    }
+    console.log("checking the token");
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+      if (err) {
+        console.log("there is an error");
+        res.status(401).json({ message: "invalid token" });
+        return;
+      } else next();
+    });
   }
 }
 app.use("/books", validateRequest, bookRouter);
@@ -74,6 +77,55 @@ app.get("/new-Book", async (req, res) => {
 //   let books = await showBooks();
 //   res.json(books);
 // });
+function validateRefresh(req, res, next) {
+  console.log("validating the refresh");
+  let header = req.headers.authorization;
+  if (!header) {
+    res.status(401).json({ message: "refresh token not provided" });
+    return;
+  }
+  let token = header.split(" ")[1];
+  console.log(token);
+  if (!token) {
+    res.status(401).json({ message: "refresh token not provided" });
+    return;
+  } else {
+    console.log("checking the token");
+    console.log(process.env.REFRESH_TOKEN_SECRET, token);
+    jwt.verify(
+      token,
+      process.env.REFRESH_TOKEN_SECRET,
+      function (err, decoded) {
+        if (err || !allRefreshToken.has(token)) {
+          console.log("there is an error", err);
+          res.status(401).json({ message: "invalid refresh token token" });
+          return;
+        } else {
+          allRefreshToken.delete(token);
+          req.decodedMessage = decoded;
+          next();
+        }
+      }
+    );
+  }
+}
+app.get("/refresh", validateRefresh, async (req, res) => {
+  let payload = {
+    email: req.decodedMessage.email,
+    userName: req.decodedMessage.userName,
+  };
+
+  let token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME,
+  });
+  let refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_DATE,
+  });
+  allRefreshToken.add(refreshToken);
+  console.log(refreshToken);
+  res.status(200).json({ Access_token: token, refresh_token: refreshToken });
+  return;
+});
 app.delete("/Books/:id", async (req, res) => {
   console.log(req.params.id);
   let deleted = await deleteWithId(req.params.id);

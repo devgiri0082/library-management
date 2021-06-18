@@ -3,6 +3,7 @@ const express = require("express");
 const { addNewUser, login } = require("../Controller/userController");
 let multer = require("multer");
 let jwt = require("jsonwebtoken");
+const allRefreshToken = require("../refreshTokens");
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -22,14 +23,22 @@ router.post("/signup", multiPart.single("profilePic"), async (req, res) => {
 router.post("/login", async (req, res) => {
   let value = await login(req.body);
   if (value.code === 200) {
-    console.log(value);
+    console.log(value, "HEllo");
     let payload = {
       email: value.message.email,
       userName: value.message.userName,
-      iat: Date.now(),
     };
-    let token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET);
-    res.status(200).json({ Access_token: token });
+
+    let token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME,
+    });
+    let refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_DATE,
+    });
+    console.log(refreshToken);
+    allRefreshToken.add(refreshToken);
+    res.status(200).json({ Access_token: token, refresh_token: refreshToken });
+    return;
   }
   res.status(value.code).json(value.message);
 });

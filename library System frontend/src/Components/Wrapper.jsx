@@ -7,10 +7,11 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CssBaseline, Drawer, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { AccountCircle, Book, Bookmark, Category } from '@material-ui/icons';
 import { useHistory } from "react-router-dom";
+
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Wrapper(props) {
     const history = useHistory();
     let [open, setOpen] = useState(false);
+
     function navigateTo(link) {
         setOpen(false);
         history.push(`/${link}`);

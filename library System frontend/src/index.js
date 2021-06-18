@@ -1,11 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./Components/App.jsx";
-import { AuthorizationContextProvider } from "./Components/Contexts/authorizationContext";
-
+import { BrowserRouter as Router } from "react-router-dom";
 ReactDOM.render(
-  <AuthorizationContextProvider>
+  <Router>
     <App />
-  </AuthorizationContextProvider>,
+  </Router>,
   document.getElementById("root")
 );
